@@ -10,6 +10,7 @@ const pool = new Pool({
 
 
 const cohort = process.argv[2];
+const values = [`%${cohort}%`];
 
 const sqlQuery = `
   SELECT teachers.name AS teacher, cohorts.name AS cohort
@@ -17,12 +18,12 @@ const sqlQuery = `
   JOIN teachers ON teachers.id = assistance_requests.teacher_id
   JOIN students ON students.id = assistance_requests.student_id
   JOIN cohorts ON cohorts.id = students.cohort_id
-  WHERE cohorts.name = '${cohort}'
+  WHERE cohorts.name LIKE $1
   GROUP BY teachers.name, cohorts.name
   ORDER BY teacher;
 `
 
-pool.query(sqlQuery)
+pool.query(sqlQuery, values)
   .then(res => {
     for (const row of res.rows) {
       console.log(`${row.cohort}: ${row.teacher}`);
